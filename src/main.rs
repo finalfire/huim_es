@@ -1,8 +1,10 @@
 use rand::Rng;
+use std::collections::HashSet;
 use std::env;
 use std::fs;
 use std::str::FromStr;
 
+#[derive(Eq, Debug, Hash, PartialEq)]
 struct Individual {
     chromosome: Vec<u8>,
     size: usize,
@@ -10,7 +12,7 @@ struct Individual {
 }
 
 struct Population {
-    individuals: Vec<Individual>
+    individuals: HashSet<Individual>
 }
 
 #[derive(Debug)]
@@ -55,11 +57,18 @@ impl Individual {
 
 impl Population {
     fn new(n: &usize, size: &usize) -> Population {
-        let individuals: Vec<Individual> = (0..*n)
-            .map(|_| Individual::new(&size))
-            .collect();
+        let mut individuals: HashSet<Individual> = HashSet::with_capacity(*n);
+        for _ in 0..n {
+            individuals.insert(Individual { size });
+        }
 
         Population { individuals }
+    }
+
+    fn compute_fitness(&mut self, db: &Database) {
+        for individual in self.individuals.iter_mut() {
+            individual.compute_fitness(db);
+        }
     }
 }
 
@@ -94,6 +103,12 @@ impl Database {
 
 fn main() {
     let min_util = 10;
-    let d = Database::from_file("input.txt");
-    println!("{:?}", d);
+    let n_generations = 100;
+    
+    let db = Database::from_file("input.txt");
+    let mut parents_pool = Population::new(&10, &db.size);
+
+    /*for generation in 0..n_generations {
+
+    }*/
 }
